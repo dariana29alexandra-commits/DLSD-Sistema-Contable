@@ -64,8 +64,6 @@ def agregar():
     descripcion = request.form.get("desc")
     monto = float(request.form.get("monto"))
     tipo = request.form.get("tipo")
-    transacciones.append({"tipo": tipo, "monto": monto, "descripcion": descripcion})
-    return redirect(url_for("home"))
-
+  transacciones.append({"tipo": tipo, "monto": monto, "descripcion": descripcion})
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
