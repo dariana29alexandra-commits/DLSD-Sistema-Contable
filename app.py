@@ -7,7 +7,7 @@ app = Flask(__name__)
 app.secret_key = "dlsd_secreto_super_seguro" # Llave interna del sistema
 
 # --- CONFIGURACIÓN DE SEGURIDAD ---
-PASSWORD_SISTEMA = "admin123" # <--- CAMBIA TU CONTRASEÑA AQUÍ
+PASSWORD_SISTEMA = "dariana29" # <--- CAMBIA TU CONTRASEÑA AQUÍ
 DB_FILE = "database.db"
 
 def init_db():
