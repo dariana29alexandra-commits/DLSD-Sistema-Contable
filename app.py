@@ -4,119 +4,47 @@ from datetime import datetime
 import io
 
 app = Flask(__name__)
-app.secret_key = "clave_segura_dariana_software_admi" # ¡No olvides cambiarla por una más compleja en un entorno real!
+app.secret_key = "dlsd_pro_system_2026_secure" # Cambio de llave para forzar nueva sesion
 
-# --- CONFIGURACIÓN CENTRAL ---
-PASSWORD_SISTEMA = "dariana29" # Tu contraseña actual
-DB_FILE = "database.db"
+# --- SYSTEM CONFIG ---
+ADMIN_PASS = "dariana29" 
+DB_NAME = "database.db"
 
 def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS transacciones (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            tipo TEXT NOT NULL,
-            monto REAL NOT NULL,
-            descripcion TEXT NOT NULL,
-            fecha TEXT NOT NULL
-        )
-    ''')
-    conn.commit()
-    conn.close()
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.execute('''CREATE TABLE IF NOT EXISTS transacciones 
+        (id INTEGER PRIMARY KEY AUTOINCREMENT, tipo TEXT, monto REAL, descripcion TEXT, fecha TEXT)''')
 
 init_db()
 
-# --- Diseño de la Página de Inicio de Sesión ---
-LOGIN_HTML_CUSTOM = """
+# --- DESIGN: CORPORATE LOGIN ---
+LOGIN_UI = """
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Seguro - D&S Admi</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <title>D&S - Access</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background: linear-gradient(135deg, #001f3f 0%, #000a1a 100%); 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            margin: 0; 
-            color: #fff;
-        }
-        .login-card { 
-            background: rgba(255, 255, 255, 0.08); /* Transparente con ligero fondo */
-            backdrop-filter: blur(10px); /* Efecto de cristal esmerilado */
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 50px 40px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4); 
-            text-align: center; 
-            width: 350px; 
-            animation: fadeIn 1s ease-out;
-        }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
-        .logo-section { margin-bottom: 30px; }
-        .logo-section .icon { font-size: 50px; color: #d4af37; margin-bottom: 15px; }
-        .logo-section .brand { font-size: 32px; font-weight: 700; color: #fff; margin: 0; }
-        .logo-section .sub { font-size: 13px; color: #aaa; text-transform: uppercase; letter-spacing: 2px; }
-        
-        input { 
-            width: calc(100% - 24px); 
-            padding: 12px; 
-            margin: 10px 0; 
-            border: 1px solid rgba(255, 255, 255, 0.3); 
-            border-radius: 10px; 
-            box-sizing: border-box; 
-            background: rgba(255, 255, 255, 0.1); 
-            color: #fff; 
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-        input::placeholder { color: #ccc; }
-        input:focus { border-color: #d4af37; }
-
-        button { 
-            width: 100%; 
-            padding: 15px; 
-            background: #d4af37; 
-            color: #001f3f; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: 700; 
-            font-size: 17px; 
-            transition: background 0.3s ease, transform 0.2s ease;
-            margin-top: 20px;
-        }
-        button:hover { background: #e0b84f; transform: translateY(-2px); }
-        .error { color: #ff6b6b; font-size: 14px; margin-top: 15px; }
-        
-        .footer-login { margin-top: 30px; font-size: 12px; color: #888; }
+        body { font-family: 'Segoe UI', sans-serif; background: #001529; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: white; }
+        .login-box { background: #ffffff; color: #333; padding: 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); text-align: center; width: 320px; }
+        .brand { color: #003366; font-size: 35px; font-weight: bold; margin: 0; }
+        .tagline { color: #d4af37; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 25px; display: block; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #003366; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .footer-text { margin-top: 20px; font-size: 11px; color: #999; }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="logo-section">
-            <i class="fas fa-lock icon"></i>
-            <h1 class="brand">D&S</h1>
-            <div class="sub">Desarrollo de Software Admi.</div>
-        </div>
-        
-        <p style="color: #eee; margin-bottom: 25px;">Accede a tu panel de control</p>
-        
-        {% if error %} <p class="error">{{ error }}</p> {% endif %}
+    <div class="login-box">
+        <i class="fas fa-shield-halved" style="font-size: 40px; color: #003366; margin-bottom: 10px;"></i>
+        <h1 class="brand">D&S</h1>
+        <span class="tagline">Desarrollo de Software Admi.</span>
         <form method="POST">
-            <input type="password" name="password" placeholder="Ingresa tu contraseña" required autofocus>
-            <button type="submit"><i class="fas fa-sign-in-alt"></i> ENTRAR</button>
+            <input type="password" name="password" placeholder="Contraseña de Administrador" required autofocus>
+            <button type="submit">INGRESAR AL SISTEMA</button>
         </form>
-        <div class="footer-login">Realizado por Dariana © 2024</div>
+        <div class="footer-text">Realizado por Dariana © 2026</div>
     </div>
 </body>
 </html>
@@ -124,312 +52,120 @@ LOGIN_HTML_CUSTOM = """
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    error = None
     if request.method == "POST":
-        clave = request.form.get("password", "").strip()
-        if clave == PASSWORD_SISTEMA:
-            session["logueado"] = True
+        if request.form.get("password", "").strip() == ADMIN_PASS:
+            session["logged"] = True
             return redirect(url_for("home"))
-        else:
-            error = "Contraseña incorrecta."
-    return render_template_string(LOGIN_HTML_CUSTOM, error=error)
+    return render_template_string(LOGIN_UI)
 
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
 
+# --- DESIGN: MAIN PANEL ---
 @app.route("/")
 def home():
-    if not session.get("logueado"): return redirect(url_for("login"))
+    if not session.get("logged"): return redirect(url_for("login"))
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(DB_NAME)
     conn.row_factory = sqlite3.Row
     rows = conn.execute("SELECT * FROM transacciones ORDER BY id DESC").fetchall()
     
-    ingresos = sum(row['monto'] for row in rows if row['tipo'] == 'Ingreso')
-    egresos = sum(row['monto'] for row in rows if row['tipo'] == 'Egreso')
-    balance = ingresos - egresos
+    ing = sum(r['monto'] for r in rows if r['tipo'] == 'Ingreso')
+    egr = sum(r['monto'] for r in rows if r['tipo'] == 'Egreso')
+    bal = ing - egr
     conn.close()
 
-    color_balance = "#28a745" if balance >= 0 else "#dc3545"
-
-    html_diseno_main = f"""
+    return render_template_string(f'''
     <!DOCTYPE html>
-    <html lang="es">
+    <html>
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>D&S - Panel Administrativo</title>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+        <title>D&S - Control Panel</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
-            :root {{ 
-                --primary-dark: #001f3f; 
-                --primary-medium: #003366; 
-                --accent-gold: #d4af37; 
-                --text-dark: #333; 
-                --text-light: #f8f9fa;
-                --bg-light: #eef1f6;
-                --card-bg: #ffffff;
-                --border-light: #e0e0e0;
-                --shadow-light: rgba(0,0,0,0.08);
-            }}
-            body {{ 
-                font-family: 'Montserrat', sans-serif; 
-                background: var(--bg-light); 
-                margin: 0; 
-                padding: 20px; 
-                color: var(--text-dark);
-            }}
-            .container {{ 
-                max-width: 700px; 
-                margin: 20px auto; 
-                background: var(--card-bg); 
-                padding: 35px; 
-                border-radius: 25px; 
-                box-shadow: 0 10px 40px var(--shadow-light); 
-            }}
-            
-            /* Header */
-            .header {{ 
-                text-align: center; 
-                position: relative; 
-                padding-bottom: 25px; 
-                border-bottom: 2px solid var(--border-light); 
-                margin-bottom: 30px; 
-            }}
-            .logout-btn {{ 
-                position: absolute; 
-                top: 0; 
-                right: 0; 
-                color: #ff6b6b; 
-                text-decoration: none; 
-                font-weight: 600; 
-                font-size: 13px; 
-                padding: 8px 15px; 
-                border: 1px solid #ff6b6b; 
-                border-radius: 10px; 
-                transition: all 0.3s ease;
-            }}
-            .logout-btn:hover {{ background: #ff6b6b; color: white; transform: translateY(-2px); }}
-            
-            .brand-logo .icon {{ font-size: 45px; color: var(--accent-gold); margin-bottom: 10px; }}
-            .brand-logo .name {{ font-size: 30px; font-weight: 700; color: var(--primary-dark); margin: 0; }}
-            .brand-logo .tagline {{ font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }}
-
-            /* Balance Card */
-            .balance-card {{ 
-                background: {color_balance}; 
-                color: white; 
-                padding: 25px; 
-                border-radius: 18px; 
-                text-align: center; 
-                margin-bottom: 30px; 
-                box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-                animation: scaleIn 0.5s ease-out;
-            }}
-            @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-            .balance-card small {{ opacity: 0.9; letter-spacing: 1px; font-size: 12px; }}
-            .balance-card .amount {{ font-size: 38px; font-weight: 700; margin-top: 8px; }}
-
-            /* Forms & Buttons */
-            .form-section {{ 
-                background: var(--bg-light); 
-                padding: 25px; 
-                border-radius: 18px; 
-                border: 1px solid var(--border-light); 
-                margin-bottom: 25px; 
-            }}
-            input, select {{ 
-                width: calc(100% - 24px); 
-                padding: 12px; 
-                margin: 8px 0; 
-                border-radius: 10px; 
-                border: 1px solid var(--border-light); 
-                box-sizing: border-box; 
-                font-size: 15px; 
-                outline: none;
-                transition: border-color 0.3s ease;
-            }}
-            input:focus, select:focus {{ border-color: var(--primary-medium); }}
-            
-            .btn-action {{ 
-                width: 100%; 
-                padding: 14px; 
-                margin-top: 15px; 
-                border: none; 
-                border-radius: 10px; 
-                font-weight: 600; 
-                font-size: 16px; 
-                cursor: pointer; 
-                transition: all 0.3s ease;
-            }}
-            .btn-save {{ background: var(--primary-medium); color: white; }}
-            .btn-save:hover {{ background: var(--primary-dark); transform: translateY(-2px); }}
-            
-            .btn-export {{ background: #1d6f42; color: white; text-decoration: none; display: block; text-align: center; }}
-            .btn-export:hover {{ background: #145532; transform: translateY(-2px); }}
-
-            /* Transactions Table */
-            h3 {{ 
-                color: var(--primary-dark); 
-                font-size: 20px; 
-                margin-bottom: 20px; 
-                display: flex; 
-                align-items: center; 
-            }}
-            h3 .fas {{ margin-right: 10px; color: var(--accent-gold); }}
-            
-            table {{ 
-                width: 100%; 
-                border-collapse: separate; /* Para border-radius en td */
-                border-spacing: 0 8px; /* Espacio entre filas */
-            }}
-            th {{ 
-                text-align: left; 
-                color: #888; 
-                padding: 12px; 
-                font-size: 11px; 
-                text-transform: uppercase; 
-                background: var(--bg-light);
-                border-bottom: none; /* Eliminar borde inferior de th */
-            }}
-            td {{ 
-                padding: 15px 12px; 
-                background: var(--card-bg); 
-                border-bottom: 1px solid var(--border-light); /* Borde entre filas */
-            }}
-            /* Estilos para la primera y última celda de cada fila */
-            tr td:first-child {{ border-top-left-radius: 8px; border-bottom-left-radius: 8px; }}
-            tr td:last-child {{ border-top-right-radius: 8px; border-bottom-right-radius: 8px; }}
-            
-            .transaction-description {{ font-weight: 600; color: var(--text-dark); }}
-            .transaction-date {{ color: #aaa; font-size: 10px; display: block; margin-top: 4px; }}
-            
-            .monto-ingreso {{ color: #28a745; font-weight: 700; }}
-            .monto-egreso {{ color: #dc3545; font-weight: 700; }}
-            
-            .btn-delete {{ 
-                color: #ccc; 
-                text-decoration: none; 
-                font-size: 18px; 
-                transition: color 0.3s ease, transform 0.2s ease;
-            }}
-            .btn-delete:hover {{ color: #dc3545; transform: scale(1.1); }}
-
-            /* Footer */
-            .footer {{ 
-                text-align: center; 
-                margin-top: 40px; 
-                color: #888; 
-                font-size: 13px; 
-                border-top: 1px solid var(--border-light); 
-                padding-top: 20px; 
-            }}
-            .footer a {{ color: var(--primary-medium); text-decoration: none; font-weight: 600; }}
+            body {{ background: #f0f2f5; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; }}
+            .card {{ max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }}
+            .header {{ text-align: center; border-bottom: 2px solid #eee; padding-bottom: 20px; margin-bottom: 20px; position: relative; }}
+            .brand {{ color: #003366; margin: 0; font-size: 30px; }}
+            .sub {{ color: #d4af37; font-size: 12px; font-weight: bold; letter-spacing: 2px; }}
+            .balance {{ background: {"#28a745" if bal >= 0 else "#dc3545"}; color: white; padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 25px; }}
+            .form-box {{ background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px; border: 1px solid #eee; }}
+            input, select, button {{ width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }}
+            .btn-save {{ background: #003366; color: white; border: none; font-weight: bold; cursor: pointer; }}
+            .btn-excel {{ background: #1d6f42; color: white; text-decoration: none; display: block; text-align: center; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }}
+            table {{ width: 100%; border-collapse: collapse; }}
+            td {{ padding: 12px; border-bottom: 1px solid #f0f0f0; }}
+            .footer {{ text-align: center; margin-top: 30px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }}
         </style>
     </head>
     <body>
-        <div class="container">
+        <div class="card">
             <div class="header">
-                <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> CERRAR SESIÓN</a>
-                <div class="brand-logo">
-                    <i class="fas fa-cubes icon"></i>
-                    <h1 class="name">D&S</h1>
-                    <div class="tagline">Desarrollo de Software Admi.</div>
-                </div>
+                <a href="/logout" style="position:absolute; right:0; color:#ff4d4d; text-decoration:none; font-weight:bold;"><i class="fas fa-power-off"></i></a>
+                <h1 class="brand">D&S</h1>
+                <div class="sub">Desarrollo de Software Admi.</div>
             </div>
-            
-            <div class="balance-card">
+            <div class="balance">
                 <small>BALANCE TOTAL</small>
-                <div class="amount">${balance:,.2f}</div>
+                <div style="font-size: 32px; font-weight: bold;">${bal:,.2f}</div>
             </div>
-
-            <div class="form-section">
+            <div class="form-box">
                 <form action="/add" method="POST">
-                    <input name="desc" placeholder="Descripción de la operación (ej: Pago de cliente)" required>
-                    <input name="monto" type="number" step="0.01" placeholder="Monto (ej: 1500.00)" required>
+                    <input name="desc" placeholder="Descripción" required>
+                    <input name="monto" type="number" step="0.01" placeholder="Monto" required>
                     <select name="tipo">
-                        <option value="Ingreso">➕ Ingreso</option>
-                        <option value="Egreso">➖ Egreso</option>
+                        <option value="Ingreso">Ingreso (+)</option>
+                        <option value="Egreso">Egreso (-)</option>
                     </select>
-                    <button type="submit" class="btn-action btn-save"><i class="fas fa-plus-circle"></i> AÑADIR REGISTRO</button>
+                    <button type="submit" class="btn-save">GUARDAR REGISTRO</button>
                 </form>
             </div>
-
-            <a href="/export" class="btn-action btn-export"><i class="fas fa-file-csv"></i> DESCARGAR REPORTE EXCEL (CSV)</a>
-
-            <h3><i class="fas fa-chart-line"></i> Historial de Movimientos ({len(rows)})</h3>
+            <a href="/export" class="btn-excel"><i class="fas fa-file-excel"></i> DESCARGAR REPORTE EXCEL</a>
+            <h3 style="color:#003366;"><i class="fas fa-list-check"></i> Historial de Movimientos</h3>
             <table>
-                <thead>
-                    <tr>
-                        <th style="width: 55%;">DETALLE</th>
-                        <th style="width: 35%;">MONTO</th>
-                        <th style="width: 10%;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {"".join([f'''
-                    <tr>
-                        <td>
-                            <span class="transaction-description">{row['descripcion']}</span>
-                            <span class="transaction-date">{row['fecha']}</span>
-                        </td>
-                        <td class="monto-{'ingreso' if row['tipo'] == 'Ingreso' else 'egreso'}">
-                            {' + ' if row['tipo'] == 'Ingreso' else ' - '}${row['monto']:,.2f}
-                        </td>
-                        <td style="text-align:right;">
-                            <a href="/del/{row['id']}" class="btn-delete" onclick="return confirm('¿Confirmas que deseas eliminar este registro de forma permanente?')">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    ''' for row in rows])}
-                </tbody>
+                {{% for row in rows %}}
+                <tr>
+                    <td><strong>{{{{ row.descripcion }}}}</strong><br><small style="color:#aaa;">{{{{ row.fecha }}}}</small></td>
+                    <td style="text-align:right; font-weight:bold; color: {{{{ 'green' if row.tipo == 'Ingreso' else 'red' }}}};">
+                        {{{{ '+' if row.tipo == 'Ingreso' else '-' }}}}${{{{ row.monto }}}}
+                    </td>
+                    <td style="text-align:right;"><a href="/del/{{{{ row.id }}}}" style="color:#ddd;"><i class="fas fa-trash"></i></a></td>
+                </tr>
+                {{% endfor %}}
             </table>
-            
-            <div class="footer">
-                Realizado por Dariana © 2024 | <a href="https://github.com/dariana29alexandra-commits" target="_blank">Visita mi GitHub</a>
-            </div>
+            <div class="footer">Realizado por Dariana © 2026 | D&S Business Intelligence</div>
         </div>
     </body>
     </html>
-    """
-    return render_template_string(html_diseno_main, rows=rows)
+    ''', rows=rows)
 
 @app.route("/add", methods=["POST"])
 def add():
-    if not session.get("logueado"): return redirect(url_for("login"))
-    descripcion = request.form.get("desc")
-    monto = float(request.form.get("monto"))
-    tipo = request.form.get("tipo")
-    fecha = datetime.now().strftime("%d/%b/%Y %H:%M") # Formato con mes abreviado
-    conn = sqlite3.connect(DB_FILE); cursor = conn.cursor()
-    cursor.execute("INSERT INTO transacciones (tipo, monto, descripcion, fecha) VALUES (?, ?, ?, ?)", (tipo, monto, descripcion, fecha))
-    conn.commit(); conn.close()
+    if not session.get("logged"): return redirect(url_for("login"))
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.execute("INSERT INTO transacciones (tipo, monto, descripcion, fecha) VALUES (?, ?, ?, ?)", 
+                     (request.form['tipo'], request.form['monto'], request.form['desc'], datetime.now().strftime("%d/%m/%Y %H:%M")))
     return redirect(url_for("home"))
 
 @app.route("/del/<int:id>")
 def delete(id):
-    if not session.get("logueado"): return redirect(url_for("login"))
-    conn = sqlite3.connect(DB_FILE); cursor = conn.cursor()
-    cursor.execute("DELETE FROM transacciones WHERE id = ?", (id,))
-    conn.commit(); conn.close()
+    if not session.get("logged"): return redirect(url_for("login"))
+    with sqlite3.connect(DB_NAME) as conn:
+        conn.execute("DELETE FROM transacciones WHERE id = ?", (id,))
     return redirect(url_for("home"))
 
 @app.route("/export")
 def export():
-    if not session.get("logueado"): return redirect(url_for("login"))
-    conn = sqlite3.connect(DB_FILE); cursor = conn.cursor()
-    cursor.execute("SELECT fecha, descripcion, tipo, monto FROM transacciones")
-    rows = cursor.fetchall(); conn.close()
+    if not session.get("logged"): return redirect(url_for("login"))
+    conn = sqlite3.connect(DB_NAME)
+    rows = conn.execute("SELECT fecha, descripcion, tipo, monto FROM transacciones").fetchall()
+    conn.close()
     si = io.StringIO()
-    si.write("Fecha,Descripcion,Tipo,Monto\\n") # Encabezados CSV
-    for row in rows:
-        si.write(f"{row[0]},{row[1]},{row[2]},{row[3]}\\n")
-    return Response(si.getvalue(), mimetype="text/csv", headers={{"Content-disposition":"attachment; filename=Reporte_DS_Administracion.csv"}})
+    si.write("Fecha,Descripcion,Tipo,Monto\\n")
+    for row in rows: si.write(f"{row[0]},{row[1]},{row[2]},{row[3]}\\n")
+    return Response(si.getvalue(), mimetype="text/csv", headers={{"Content-disposition":"attachment; filename=Reporte_DS.csv"}})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+                     
