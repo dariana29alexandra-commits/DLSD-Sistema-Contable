@@ -27,9 +27,11 @@ def home():
             h1, h2 {{ color: #1a73e8; text-align: center; }}
             .resumen {{ display: flex; justify-content: space-around; background: #e8f0fe; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
             input, select, button {{ width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }}
-            button {{ background-color: #1a73e8; color: white; border: none; cursor: pointer; font-weight: bold; }}
+            button {{ background-color: #1a73e8; color: white; border: none; cursor: pointer; font-weight: bold; padding: 12px; }}
+            button:hover {{ background-color: #1557b0; }}
             table {{ width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }}
             td, th {{ border-bottom: 1px solid #eee; padding: 10px; text-align: left; }}
+            th {{ background-color: #f8f9fa; }}
         </style>
     </head>
     <body>
@@ -40,7 +42,7 @@ def home():
             </div>
             <h2>Agregar Movimiento</h2>
             <form action="/agregar" method="POST">
-                <input type="text" name="desc" placeholder="Descripción" required>
+                <input type="text" name="desc" placeholder="Descripción (Ej: Venta)" required>
                 <input type="number" name="monto" placeholder="Monto $" step="0.01" required>
                 <select name="tipo">
                     <option value="Ingreso">Ingreso (+)</option>
@@ -61,9 +63,15 @@ def home():
 
 @app.route("/agregar", methods=["POST"])
 def agregar():
-    descripcion = request.form.get("desc")
-    monto = float(request.form.get("monto"))
-    tipo = request.form.get("tipo")
-  transacciones.append({"tipo": tipo, "monto": monto, "descripcion": descripcion})
+    try:
+        descripcion = request.form.get("desc")
+        monto = float(request.form.get("monto"))
+        tipo = request.form.get("tipo")
+        # Aquí estaba el error (tenía doble llave). Ya lo corregí:
+        transacciones.append({"tipo": tipo, "monto": monto, "descripcion": descripcion})
+        return redirect(url_for("home"))
+    except Exception as e:
+        return f"Ocurrió un error: {e}"
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
