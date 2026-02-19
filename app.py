@@ -2,10 +2,9 @@ from flask import Flask, render_template_string, request, redirect, url_for
 
 app = Flask(__name__)
 
-# Nuestra "Base de Datos" temporal
 transacciones = [
-    {"tipo": "Ingreso", "monto": 1000, "descripcion": "Pago Cliente A"},
-    {"tipo": "Egreso", "monto": 200, "descripcion": "Pago Internet"}
+    {"tipo": "Ingreso", "monto": 1000, "descripcion": "Venta Inicial"},
+    {"tipo": "Egreso", "monto": 200, "descripcion": "Gastos Operativos"}
 ]
 
 @app.route("/")
@@ -20,40 +19,97 @@ def home():
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>DLSD Contable</title>
+        <title>DLSD Contable Pro</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
         <style>
-            body {{ font-family: sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }}
-            .container {{ max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }}
-            h1, h2 {{ color: #1a73e8; text-align: center; }}
-            .resumen {{ display: flex; justify-content: space-around; background: #e8f0fe; padding: 15px; border-radius: 8px; margin-bottom: 20px; }}
-            input, select, button {{ width: 100%; padding: 10px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }}
-            button {{ background-color: #1a73e8; color: white; border: none; cursor: pointer; font-weight: bold; padding: 12px; }}
-            button:hover {{ background-color: #1557b0; }}
-            table {{ width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }}
-            td, th {{ border-bottom: 1px solid #eee; padding: 10px; text-align: left; }}
-            th {{ background-color: #f8f9fa; }}
+            :root {{
+                --primary: #2563eb;
+                --success: #10b981;
+                --danger: #ef4444;
+                --dark: #1f2937;
+            }}
+            body {{ 
+                font-family: 'Inter', sans-serif; 
+                background-color: #f3f4f6; 
+                margin: 0; padding: 20px;
+                display: flex; justify-content: center;
+            }}
+            .container {{ 
+                max-width: 600px; width: 100%; 
+                background: white; padding: 30px; 
+                border-radius: 20px; shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            }}
+            .header {{ text-align: center; margin-bottom: 30px; }}
+            .logo {{ 
+                font-size: 50px; color: var(--primary); 
+                margin-bottom: 10px; 
+            }}
+            .header h1 {{ margin: 0; color: var(--dark); font-size: 24px; }}
+            
+            .stats {{ 
+                display: grid; grid-template-columns: 1fr; gap: 15px;
+                margin-bottom: 30px;
+            }}
+            .stat-card {{ 
+                padding: 15px; border-radius: 12px; color: white;
+                text-align: center; font-weight: bold;
+            }}
+            .bg-blue {{ background: var(--primary); }}
+            
+            form {{ background: #f9fafb; padding: 20px; border-radius: 15px; border: 1px solid #e5e7eb; }}
+            input, select, button {{ 
+                width: 100%; padding: 12px; margin: 8px 0; 
+                border-radius: 8px; border: 1px solid #d1d5db; box-sizing: border-box; 
+            }}
+            button {{ 
+                background: var(--primary); color: white; border: none; 
+                font-weight: bold; cursor: pointer; transition: 0.3s;
+            }}
+            button:hover {{ background: #1d4ed8; transform: translateY(-2px); }}
+            
+            table {{ width: 100%; border-collapse: collapse; margin-top: 25px; }}
+            th {{ text-align: left; color: #6b7280; font-size: 12px; text-transform: uppercase; padding: 10px; }}
+            td {{ padding: 12px; border-bottom: 1px solid #f3f4f6; }}
+            .tag {{ 
+                padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold;
+            }}
+            .tag-ingreso {{ background: #d1fae5; color: #065f46; }}
+            .tag-egreso {{ background: #fee2e2; color: #991b1b; }}
         </style>
     </head>
     <body>
         <div class="container">
-            <h1>📊 Sistema DLSD</h1>
-            <div class="resumen">
-                <div><strong>Balance Actual:</strong><br>${balance}</div>
+            <div class="header">
+                <div class="logo"><i class="fas fa-chart-line"></i></div>
+                <h1>DLSD SISTEMA CONTABLE</h1>
+                <p style="color: #6b7280;">Bienvenida de nuevo, Dariana</p>
             </div>
-            <h2>Agregar Movimiento</h2>
+            
+            <div class="stats">
+                <div class="stat-card bg-blue">
+                    <small>BALANCE TOTAL</small>
+                    <div style="font-size: 28px;">${balance:,.2f}</div>
+                </div>
+            </div>
+
             <form action="/agregar" method="POST">
-                <input type="text" name="desc" placeholder="Descripción (Ej: Venta)" required>
-                <input type="number" name="monto" placeholder="Monto $" step="0.01" required>
+                <label style="font-size: 12px; font-weight: bold; color: #374151;">NUEVO REGISTRO</label>
+                <input type="text" name="desc" placeholder="Descripción de la operación" required>
+                <input type="number" name="monto" placeholder="Monto 0.00" step="0.01" required>
                 <select name="tipo">
-                    <option value="Ingreso">Ingreso (+)</option>
-                    <option value="Egreso">Egreso (-)</option>
+                    <option value="Ingreso">🟢 Ingreso</option>
+                    <option value="Egreso">🔴 Egreso</option>
                 </select>
-                <button type="submit">Guardar Registro</button>
+                <button type="submit"><i class="fas fa-plus"></i> GUARDAR EN SISTEMA</button>
             </form>
-            <h2>Historial</h2>
+
             <table>
-                <tr><th>Descripción</th><th>Monto</th><th>Tipo</th></tr>
-                {"".join([f"<tr><td>{t['descripcion']}</td><td>${t['monto']}</td><td>{t['tipo']}</td></tr>" for t in transacciones])}
+                <thead>
+                    <tr><th>Detalle</th><th>Monto</th><th>Tipo</th></tr>
+                </thead>
+                <tbody>
+                    {"".join([f"<tr><td>{t['descripcion']}</td><td><b>${t['monto']:,.2f}</b></td><td><span class='tag tag-{t['tipo'].lower()}'>{t['tipo']}</span></td></tr>" for t in transacciones])}
+                </tbody>
             </table>
         </div>
     </body>
@@ -67,11 +123,10 @@ def agregar():
         descripcion = request.form.get("desc")
         monto = float(request.form.get("monto"))
         tipo = request.form.get("tipo")
-        # Aquí estaba el error (tenía doble llave). Ya lo corregí:
         transacciones.append({"tipo": tipo, "monto": monto, "descripcion": descripcion})
         return redirect(url_for("home"))
     except Exception as e:
-        return f"Ocurrió un error: {e}"
+        return f"Error: {e}"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
